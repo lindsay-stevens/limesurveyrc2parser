@@ -1,6 +1,8 @@
-import requests
+from urllib.request import urlopen, Request
+from urllib.parse import urlencode
 import json
 from collections import OrderedDict
+
 
 class LimeSurveyError(Exception):
     """Base class for exceptions in LimeSurvey."""
@@ -10,6 +12,7 @@ class LimeSurveyError(Exception):
         if args is not None:
             message += [str(x) for x in args]
         self.message = " | ".join(message)
+
 
 class LimeSurveyClient(object):
 
@@ -43,29 +46,31 @@ class LimeSurveyClient(object):
             ("params", params),
             ("id", 1)  # Possibly a request id for parallel use cases.
         ])
-        data_json = json.dumps(data)
 
         # 2. Query the API
-        response = requests.post(self.url, headers=self.headers, json=data)
+        param_data = urlencode(data).encode("ascii")
+        req = Request(url=self.url, data=param_data, headers=self.headers)
+        with urlopen(req, data=param_data) as response:
+            content = response.read().decode("utf-8")
 
-        if not response.ok:
+        if response.status != 200:
             raise LimeSurveyError(
-                method, "Not response.ok", response.status_code,
-                response.content)
+                method, "Not response.ok", response.status,
+                content)
 
-        if not 0 < len(response.content):
+        if not 0 < len(content):
             raise LimeSurveyError(
                 method, "Not 0 < len(response.content)",
-                response.status_code, response.content)
+                response.status, content)
 
-        response_data = response.json()
+        response_data = json.loads(content)
 
         try:
             return_value = response_data.get("result")
         except KeyError:
             raise LimeSurveyError(
                 method, "Key 'result' not in response json",
-                response.status_code, response.content)
+                response.status, content)
 
         return return_value
 #METHODSPLACEHOLDER

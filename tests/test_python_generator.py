@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from .context import limesurveyrc2parser as pkg
+from unittest import TestCase
+from limesurveyrc2parser import LimeSurveyRc2PythonSourceGenerator as \
+    SourceGenerator, LimeSurveyRc2PhpSourceParser as Parser
 
-SourceGenerator = pkg.LimeSurveyRc2PythonSourceGenerator
 
-
-class TestPythonGenerate(object):
+class TestPythonGenerate(TestCase):
     def test_generate(self):
         parse_result = [
             {"name": "function_name",
@@ -19,7 +19,7 @@ class TestPythonGenerate(object):
     def test_generate_real(self):
         with open('resource/lsrc2source.php') as f:
             php_source = f.read()
-        parse_result = pkg.LimeSurveyRc2PhpSourceParser.parse(php_source)
+        parse_result = Parser.parse(php_source)
         py_source = SourceGenerator.generate(parse_result)
         print(py_source)
 

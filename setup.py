@@ -12,10 +12,7 @@ setup(
     test_suite="tests",
     include_package_data=True,
     license="Apache",
-    install_requires=[
-        "requests",
-        "pydash"
-    ],
+    install_requires=[],
     entry_points={
         "console_scripts": [
             "lsrc2download=script:download",

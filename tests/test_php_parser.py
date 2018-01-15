@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import json
-from .context import limesurveyrc2parser as pkg
-
-Parser = pkg.LimeSurveyRc2PhpSourceParser
+from unittest import TestCase
+from limesurveyrc2parser import LimeSurveyRc2PhpSourceParser as Parser
 
 
-class TestPhpParser(object):
+class TestPhpParser(TestCase):
 
     def test_match_php_function_re_array_default(self):
         """

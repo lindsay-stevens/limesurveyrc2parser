@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 import re
-import pydash
+
+
+def snake_case(text):
+    upper = "[A-Z\\xC0-\\xD6\\xD8-\\xDE]"
+    lower = "[a-z\\xDf-\\xF6\\xF8-\\xFF]+"
+    words = ("{upper}+(?={upper}{lower})|{upper}?{lower}|{upper}+|[0-9]+"
+             "".format(upper=upper, lower=lower))
+    regex_find = re.findall(words, text)
+    return "_".join(word.lower() for word in regex_find if word)
 
 
 class LimeSurveyRc2PhpSourceParser(object):
@@ -107,6 +115,8 @@ class LimeSurveyRc2PhpSourceParser(object):
             if default is not None:
                 details['default'] = cls.get_py_default_from_php_default(
                     default, details.get("type", None))
+            if details.get("type") is None and "type" in details.keys():
+                del details["type"]
             result.append(details)
         return result
 
@@ -163,21 +173,19 @@ class LimeSurveyRc2PhpSourceParser(object):
         # bad CamelCase for IDS:
         # groupIDs would be converted to "group_i_ds"
         name = php_name_stripped.replace("IDs", "Ids")
-        return pydash.snake_case(name)
+        return snake_case(name)
 
     @staticmethod
     def get_py_default_from_php_default(php_default, typ=None):
+        php_default_lower = php_default.lower()
         php_default_map = {
-            "NULL": None,
             "null": None,
             "true": True,
             "false": False,
-            "FALSE": False,
             "array()": {},
-            "Array()": {}
         }
-        if php_default in php_default_map:
-            return php_default_map[php_default]
+        if php_default_lower in php_default_map:
+            return php_default_map[php_default_lower]
 
         # Do we have type information?
         if typ:

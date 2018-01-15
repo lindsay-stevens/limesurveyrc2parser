@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import requests
+from urllib.request import urlopen
 import limesurveyrc2parser as pkg
+import argparse
 
 
 def download():
@@ -8,12 +9,10 @@ def download():
     url = "https://raw.githubusercontent.com/LimeSurvey/LimeSurvey/master/" \
           "application/helpers/remotecontrol/remotecontrol_handle.php"
     print("Download from %s" % url)
-    r = requests.get(url)
-
-    print("Save as lsrc2source.php")
-    with open('lsrc2source.php', mode='w') as f:
-        f.write(r.text)
-    print("Done")
+    with urlopen(url) as response, open('lsrc2source.php', mode='w') as f:
+        print("Save as lsrc2source.php")
+        f.write(response.read().decode("utf-8"))
+        print("Done")
 
 
 def generate_python_code():
@@ -29,3 +28,18 @@ def generate_python_code():
     with open('lsrc2client.py', mode='w') as f:
         f.write(py_source)
     print("Done")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="""LimeSurvey RC2 API Client Generator""")
+    parser.add_argument("--download", action="store_true", default=False)
+    parser.add_argument("--generate", action="store_true", default=False)
+    args = parser.parse_args()
+    if args.download:
+        download()
+    if args.generate:
+        generate_python_code()
+    if not args.download and not args.generate:
+        print("\nChoose a mode: '--download' and/or '--generate'."
+              " Or just '--help'.\n")
